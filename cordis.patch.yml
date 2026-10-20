@@ -1,0 +1,6 @@
+# 注册湛卢 provider，不改变 profile 当前的默认模型。
+# 插件复用湛卢桌面 App 已登录的网关凭据；自身不发起任何登录流程。
+
+- insert:
+    - id: llm-zhanlu
+      name: dsh-zhanlu-connect

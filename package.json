@@ -1,0 +1,47 @@
+{
+  "name": "dsh-zhanlu-connect",
+  "displayName": "DSH Zhanlu Connect",
+  "description": "把湛卢（Zhanlu）桌面 App 携带的模型接入 DeepSeek Harness —— 复用 App 已登录的网关凭据，支持 macOS/Windows 平台适配与选择，并提供模型显隐与上下文窗口配置页。",
+  "icon": "icon.png",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "deepseek",
+    "zhanlu",
+    "model-provider",
+    "windows",
+    "macos"
+  ],
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "icon.png",
+    "src",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "doctor": "node test/doctor.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  }
+}
