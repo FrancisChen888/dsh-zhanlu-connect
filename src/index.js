@@ -19,8 +19,9 @@ import { resolveDshHome } from '@deepseek-ai/dsh-home-paths'
 import { resolveImageAttachmentAccess } from '@deepseek-ai/dsh-llm'
 import { createZhanluAdapter, toModelInfos, PROVIDER_ID, PROVIDER_DISPLAY_NAME } from './adapter.js'
 import { projectZhanluIdentity, AUTH_FILENAME } from './credential.js'
-import { ZhanluGatewayClient, FALLBACK_CONTEXT_WINDOW, describeModel, normalizeBaseURL, KNOWN_MODELS } from './gateway.js'
+import { ZhanluGatewayClient, normalizeBaseURL, KNOWN_MODELS } from './gateway.js'
 import { PreferenceStore, applyPreferences } from './preferences.js'
+import { CATALOG_FORMAT_VERSION, parseCatalog } from './models.js'
 import { pickZhanluDataDir, resolvePlatform } from './platform.js'
 import { CONFIG_PATH, createConfigHandler } from './config-route.js'
 import { QUOTA_PATH, createQuotaHandler } from './quota-route.js'
@@ -48,9 +49,6 @@ export const CATALOG_FILENAME = '.zhanlu-catalog.json'
 
 /** 用户偏好文件名（模型显隐与上下文窗口覆盖）。 */
 export const PREFERENCES_FILENAME = '.zhanlu-preferences.json'
-
-/** 缓存格式版本；不认识的一律丢弃而不是猜测。 */
-const CATALOG_FORMAT_VERSION = 1
 
 /**
  * 湛卢网关默认地址。
@@ -91,46 +89,6 @@ export const Config = z.object({
 export function catalogPath(identity) {
   if (identity && !/^[a-f0-9]{64}$/.test(identity)) throw new Error('Invalid catalog identity')
   return join(resolveDshHome(), identity ? `.zhanlu-catalog-${identity}.json` : CATALOG_FILENAME)
-}
-
-/**
- * 把缓存文件的内容解析成模型描述数组。
- *
- * 解析逻辑在这里集中一次，供同步与异步两条读取路径共用，避免两处判据漂移。
- *
- * @param {string} raw
- * @returns {Array<{ id: string, name: string, contextWindow: number, maxTokens: number, reasoning: boolean, input?: string[] }>}
- */
-function parseCatalog(raw) {
-  let parsed
-  try {
-    parsed = JSON.parse(raw)
-  } catch {
-    return []
-  }
-  if (parsed?.version !== CATALOG_FORMAT_VERSION) return []
-  if (!Array.isArray(parsed.models)) return []
-  const out = []
-  for (const entry of parsed.models) {
-    if (entry === null || typeof entry !== 'object') continue
-    if (typeof entry.id !== 'string' || entry.id.length === 0) continue
-    out.push({
-      id: entry.id,
-      // 展示名与模态同以代码为准：缓存里的名字可能是旧版命名（无模态后缀）。
-      name: describeModel(entry.id).name,
-      contextWindow:
-        Number.isFinite(entry.contextWindow) && entry.contextWindow > 0
-          ? entry.contextWindow
-          : FALLBACK_CONTEXT_WINDOW,
-      maxTokens: Number.isFinite(entry.maxTokens) && entry.maxTokens > 0 ? entry.maxTokens : 32768,
-      reasoning: entry.reasoning === true,
-      // 模态能力一律以代码里的 KNOWN_MODELS 为准，不信任缓存：
-      // 上游能力会变化（2026-10-13 实测 qwen3.7-max 等 4 个模型图片输入被网关 400 拒收），
-      // 若缓存优先，代码里的能力修正会被旧缓存静默覆盖，bug 永不愈合。
-      input: describeModel(entry.id).input,
-    })
-  }
-  return out
 }
 
 /**

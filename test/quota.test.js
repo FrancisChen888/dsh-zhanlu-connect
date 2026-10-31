@@ -50,13 +50,13 @@ test('gateway: normalizeBaseURL 去尾斜杠', () => {
   assert.equal(normalizeBaseURL('http://x/y//'), 'http://x/y')
 })
 
-test('gateway: describeModel 保持 zhanlu/ 前缀与 512K 预设', () => {
+test('gateway: describeModel 保持 zhanlu/ 前缀与 1M 预设', () => {
   const known = describeModel('zhanlu/glm-5.3')
   assert.equal(known.id, 'zhanlu/glm-5.3')
-  assert.equal(known.contextWindow, 524288)
+  assert.equal(known.contextWindow, 1048576)
   assert.equal(known.reasoning, true)
   const unknown = describeModel('zhanlu/brand-new-model')
-  assert.equal(unknown.contextWindow, 524288)
+  assert.equal(unknown.contextWindow, 1048576)
   assert.equal(unknown.input[0], 'text')
 })
 

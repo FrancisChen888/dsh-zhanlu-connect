@@ -79,8 +79,8 @@ test('PreferenceStore: 损坏文件回落空偏好（含平台 auto）', async (
 
 test('applyPreferences: 平台字段不参与模型过滤', () => {
   const models = [
-    { id: 'zhanlu/auto', name: 'Auto', contextWindow: 524288, maxTokens: 32768, reasoning: false, input: ['text'] },
-    { id: 'zhanlu/glm-5.3', name: 'GLM-5.3', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text'] },
+    { id: 'zhanlu/auto', name: 'Auto', contextWindow: 1048576, maxTokens: 32768, reasoning: false, input: ['text'] },
+    { id: 'zhanlu/glm-5.3', name: 'GLM-5.3', contextWindow: 1048576, maxTokens: 32768, reasoning: true, input: ['text'] },
   ]
   const visible = applyPreferences(models, { hiddenModels: [], contextOverrides: {}, platform: 'windows' })
   assert.equal(visible.length, 2)

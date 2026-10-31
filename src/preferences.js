@@ -28,7 +28,7 @@ export const PREFERENCES_FORMAT_VERSION = 2
  * 上下文窗口的合法范围。
  *
  * 下限取 4K（比这更小的窗口装不下系统提示词，设了也没意义）；
- * 上限取 2M（当前没有模型的窗口接近这个量级，更大的值多半是误输入）。
+ * 上限取 2M，允许覆盖内置的 1M 默认窗口，并拦截明显过大的误输入。
  */
 export const MIN_CONTEXT_WINDOW = 4096
 export const MAX_CONTEXT_WINDOW = 2097152

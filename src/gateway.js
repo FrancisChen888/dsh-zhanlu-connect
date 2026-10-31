@@ -16,14 +16,17 @@
 /** 网关上模型 id 的固定前缀。 */
 export const MODEL_ID_PREFIX = 'zhanlu/'
 
+/** 已知与未知模型的默认上下文统一为 1M（1,048,576 tokens）。 */
+export const FALLBACK_CONTEXT_WINDOW = 1048576
+
 /**
  * 已知模型的容量元数据。
  *
  * 网关的 `/v1/models` 只返回 id，不带上下文窗口与输出上限，因此容量靠这张表
- * 补齐；已知与未知模型的上下文默认均为 512K（524288 tokens）。
+ * 补齐；已知与未知模型的上下文默认均为 1M（1,048,576 tokens）。
  *
- * 2026-10-12 按用户要求统一上下文预设；这是 DSH 侧预算，不是网关已验证上限。
- * 输出上限保持原值。若实际服务容量更小，长请求可能被拒绝或超时。
+ * 2026-11-01 根据用户确认的模型容量，将 DSH 侧上下文预算统一适配为 1M。
+ * 输出上限保持原值；用户显式配置的上下文覆盖仍优先。
  *
  * 图片能力随上游路由变化，以最近一次的**真实图片**实测矩阵为准：
  *   - 2026-10-13 实测（test/probe-matrix.mjs，真实照片）：qwen3.7-max 对任何图片
@@ -38,26 +41,24 @@ export const MODEL_ID_PREFIX = 'zhanlu/'
  */
 export const KNOWN_MODELS = Object.freeze({
   // 图片能力只为网关逐一实测答出随机码的模型声明；其余维持文本输入。
-  'zhanlu/auto': { name: 'Zhanlu Auto', contextWindow: 524288, maxTokens: 32768, input: ['text', 'image'] },
-  'zhanlu/deepseek-v4.1-flash': { name: 'DeepSeek V4.1 Flash', contextWindow: 524288, maxTokens: 65536, reasoning: true, input: ['text', 'image'] },
-  'zhanlu/deepseek-v4-pro': { name: 'DeepSeek V4 Pro', contextWindow: 524288, maxTokens: 65536, reasoning: true },
-  'zhanlu/deepseek-v4-flash': { name: 'DeepSeek V4 Flash', contextWindow: 524288, maxTokens: 65536, reasoning: true },
-  'zhanlu/glm-5.3': { name: 'GLM-5.3', contextWindow: 524288, maxTokens: 32768, reasoning: true },
-  'zhanlu/glm-5.3-flash': { name: 'GLM-5.3 Flash', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
-  'zhanlu/glm-5.2': { name: 'GLM-5.2', contextWindow: 524288, maxTokens: 32768, reasoning: true },
-  'zhanlu/glm-5.1': { name: 'GLM-5.1', contextWindow: 524288, maxTokens: 32768, reasoning: true },
-  'zhanlu/glm-4.7': { name: 'GLM-4.7', contextWindow: 524288, maxTokens: 32768 },
-  'zhanlu/kimi-k3': { name: 'Kimi K3', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
-  'zhanlu/minimax-m3': { name: 'MiniMax M3', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
-  'zhanlu/minimax-2.7': { name: 'MiniMax 2.7', contextWindow: 524288, maxTokens: 32768 },
-  'zhanlu/qwen3.7-max': { name: 'Qwen3.7 Max', contextWindow: 524288, maxTokens: 32768, reasoning: true },
-  'zhanlu/qwen3.7-plus': { name: 'Qwen3.7 Plus', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
-  'zhanlu/qwen3.6-plus': { name: 'Qwen3.6 Plus', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
-  'zhanlu/qwen3.6-35b-a3b': { name: 'Qwen3.6 35B A3B', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
+  'zhanlu/auto': { name: 'Zhanlu Auto', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, input: ['text', 'image'] },
+  'zhanlu/deepseek-v4.1-flash': { name: 'DeepSeek V4.1 Flash', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 65536, reasoning: true, input: ['text', 'image'] },
+  'zhanlu/deepseek-v4-pro': { name: 'DeepSeek V4 Pro', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 65536, reasoning: true },
+  'zhanlu/deepseek-v4-flash': { name: 'DeepSeek V4 Flash', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 65536, reasoning: true },
+  'zhanlu/glm-5.3': { name: 'GLM-5.3', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true },
+  'zhanlu/glm-5.3-flash': { name: 'GLM-5.3 Flash', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
+  'zhanlu/glm-5.2': { name: 'GLM-5.2', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true },
+  'zhanlu/glm-5.1': { name: 'GLM-5.1', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true },
+  'zhanlu/glm-4.7': { name: 'GLM-4.7', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768 },
+  'zhanlu/kimi-k3': { name: 'Kimi K3', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
+  'zhanlu/minimax-m3': { name: 'MiniMax M3', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
+  'zhanlu/minimax-2.7': { name: 'MiniMax 2.7', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768 },
+  'zhanlu/qwen3.7-max': { name: 'Qwen3.7 Max', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true },
+  'zhanlu/qwen3.7-plus': { name: 'Qwen3.7 Plus', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
+  'zhanlu/qwen3.6-plus': { name: 'Qwen3.6 Plus', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
+  'zhanlu/qwen3.6-35b-a3b': { name: 'Qwen3.6 35B A3B', contextWindow: FALLBACK_CONTEXT_WINDOW, maxTokens: 32768, reasoning: true, input: ['text', 'image'] },
 })
 
-/** 目录里没见过的模型也使用用户指定的 512K 上下文预设（未经容量实测）。 */
-export const FALLBACK_CONTEXT_WINDOW = 524288
 export const FALLBACK_MAX_TOKENS = 32768
 
 /**

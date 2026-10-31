@@ -14,6 +14,7 @@ import { createStatusHandler } from '../src/status-route.js'
 import { createQuotaHandler } from '../src/quota-route.js'
 import { PreferenceStore } from '../src/preferences.js'
 import { LoginStore, LOGIN_MODES } from '../src/login-store.js'
+import { describeModel } from '../src/gateway.js'
 
 /** 伪造 http req/res，端点处理器直接调用。 */
 function mockRes() {
@@ -39,7 +40,7 @@ test('config GET/POST：platform 字段读写往返', async () => {
     store.loadSync()
     const handler = createConfigHandler({
       store,
-      listModels: () => [{ id: 'zhanlu/glm-5.3', name: 'GLM-5.3 · 文本', contextWindow: 524288, maxTokens: 32768, reasoning: true, input: ['text'] }],
+      listModels: () => [describeModel('zhanlu/glm-5.3')],
       onChanged: () => {},
     })
     const getRes = mockRes()
@@ -47,6 +48,9 @@ test('config GET/POST：platform 字段读写往返', async () => {
     assert.equal(getRes.statusCode, 200)
     const got = JSON.parse(getRes.body)
     assert.equal(got.platform, 'auto', '初始平台为 auto')
+    assert.equal(got.models[0].defaultContextWindow, 1048576)
+    assert.equal(got.models[0].contextWindow, 1048576)
+    assert.ok(got.limits.max >= 1048576, '配置页允许 1M 窗口')
 
     const postRes = mockRes()
     await handler(mockReq('POST', { hiddenModels: [], contextOverrides: {}, platform: 'windows' }), postRes)
