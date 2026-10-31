@@ -3,7 +3,7 @@
   "displayName": "DSH Zhanlu Connect",
   "description": "把湛卢（Zhanlu）桌面 App 携带的模型接入 DeepSeek Harness —— 复用 App 已登录的网关凭据，支持 macOS/Windows 平台适配与选择，并提供模型显隐与上下文窗口配置页。",
   "icon": "icon.png",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "type": "module",
   "keywords": [
